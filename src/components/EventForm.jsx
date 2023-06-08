@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   eventClear,
@@ -7,61 +7,68 @@ import {
   setEndDate,
   addEvent,
 } from "../features/eventSlice";
-// import { RRule, rrulestr } from "rrule";
+import { RRule } from "rrule";
 
 const EventForm = ({ calendarRef }) => {
+  const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
-  // Retrieve data from the Redux store using the useSelector hook
   const { eventTitle, startDate, endDate } = useSelector(
     (state) => state.event
   );
-  // Event title change handler
+
   const handleEventTitleChange = (e) => {
-    dispatch(setEventTitle(e.target.value)); // Dispatch an action to update the event title in the Redux store
+    dispatch(setEventTitle(e.target.value));
   };
-  // Start date change handler
+
   const handleStartDateChange = (e) => {
-    dispatch(setStartDate(e.target.value)); // Dispatch an action to update the start date in the Redux store
+    dispatch(setStartDate(e.target.value));
   };
-  // End date change handler
+
   const handleEndDateChange = (e) => {
-    dispatch(setEndDate(e.target.value)); // Dispatch an action to update the end date in the Redux store
+    dispatch(setEndDate(e.target.value));
   };
 
   const handleSubmit = () => {
-    // Obtain the FullCalendar API from the calendarRef
     const calendarApi = calendarRef.current.getApi();
 
-    const newEvent = {
-      title: eventTitle,
-      start: startDate,
-      end: endDate,
-    };
-    // const rruleString =
-    //   "DTSTART:20230509T183000Z;RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20230606T183000Z";
-    // const rruleData = rrulestr(rruleString);
-    // const newEvent = {
-    //   title: "Recurring Event",
-    //   rrule: {
-    //     dtstart: rruleData.options.dtstart,
-    //     freq: rruleData.options.freq,
-    //     interval: rruleData.options.interval,
-    //     count: rruleData.options.count,
-    //     byday: rruleData.options.byday,
-    //   },
-    // };
+    const rrule = new RRule({
+      freq: RRule.DAILY,
+      dtstart: new Date(startDate),
+      until: new Date(endDate),
+    });
 
-    calendarApi.addEvent(newEvent);
-    dispatch(addEvent(newEvent)); // Dispatch the addEvent action to update the events array
+    const recurringDates = rrule.all();
+
+    if (recurringDates.length > 0) {
+      const newEvent = {
+        title: eventTitle,
+        start: recurringDates[0].toISOString(),
+        end: recurringDates[recurringDates.length - 1].toISOString(),
+      };
+
+      console.log(newEvent);
+
+      calendarApi.addEvent(newEvent);
+      dispatch(addEvent(newEvent));
+    }
   };
+  const handleButtonClick = () => {
+    // Perform form validation here
+    if (eventTitle && startDate && endDate) {
+      handleSubmit();
+    } else {
+      // Display an error message
+      setErrorMessage("Please fill all the fields in the form");
+    }
+  };
+
   const handleClearEvents = () => {
-    // Obtain the FullCalendar API from the calendarRef
     const calendarApi = calendarRef.current.getApi();
 
-    // Clear existing events
     calendarApi.removeAllEvents();
-    dispatch(eventClear()); // Dispatch the clear event action
+    dispatch(eventClear());
   };
+
   return (
     <div>
       <form>
@@ -113,14 +120,16 @@ const EventForm = ({ calendarRef }) => {
             className="shadow-lg rounded-lg px-5 py-2  w-full"
           />
         </div>
+        <p className="text-center mt-2">{errorMessage}</p>
         <div className="mt-4 flex gap-4 justify-center">
           <button
             className="bg-black px-5 py-2 rounded-lg shadow-lg text-[#B0F3F1]"
             type="button"
-            onClick={handleSubmit}
+            onClick={handleButtonClick}
           >
             Submit
           </button>
+
           <button
             className="bg-white px-5 py-2 rounded-lg shadow-lg text-black"
             type="button"
