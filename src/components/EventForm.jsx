@@ -12,23 +12,24 @@ import { RRule } from "rrule";
 const EventForm = ({ calendarRef }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const dispatch = useDispatch();
+  // Retrieve data from the Redux store using the useSelector hook
   const { eventTitle, startDate, endDate } = useSelector(
     (state) => state.event
   );
-
+  // Event title change handler
   const handleEventTitleChange = (e) => {
-    dispatch(setEventTitle(e.target.value));
+    dispatch(setEventTitle(e.target.value)); // Dispatch an action to update the event title in the Redux store
   };
-
+  // Start date change handler
   const handleStartDateChange = (e) => {
-    dispatch(setStartDate(e.target.value));
+    dispatch(setStartDate(e.target.value)); // Dispatch an action to update the start date in the Redux store
   };
-
+  // End date change handler
   const handleEndDateChange = (e) => {
-    dispatch(setEndDate(e.target.value));
+    dispatch(setEndDate(e.target.value)); // Dispatch an action to update the end date in the Redux store
   };
-
   const handleSubmit = () => {
+    // Obtain the FullCalendar API from the calendarRef
     const calendarApi = calendarRef.current.getApi();
 
     const rrule = new RRule({
@@ -37,18 +38,19 @@ const EventForm = ({ calendarRef }) => {
       until: new Date(endDate),
     });
 
+    // Check if there are any recurring dates
     const recurringDates = rrule.all();
 
     if (recurringDates.length > 0) {
+      // Create a new event with the first and last recurring dates
       const newEvent = {
         title: eventTitle,
-        start: recurringDates[0].toISOString(),
-        end: recurringDates[recurringDates.length - 1].toISOString(),
+        start: recurringDates[0].toISOString(), // Start date of the first recurring date
+        end: recurringDates[recurringDates.length - 1].toISOString(), // End date of the last recurring date
       };
-
-      console.log(newEvent);
-
+      // Add new event to the calendar
       calendarApi.addEvent(newEvent);
+      // Dispatch an action to add the new event to Events
       dispatch(addEvent(newEvent));
     }
   };
