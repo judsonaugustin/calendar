@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import FullCalendar from "@fullcalendar/react";
+import rrulePlugin from "@fullcalendar/rrule";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -38,8 +39,13 @@ const CalendarApp = () => {
         <div className="w-3/4 h-screen flex">
           <div className=" bg-white mt-auto mb-4 w-full py-4 px-4 border-t-8 border-yellow-200 rounded-3xl">
             <FullCalendar
-              // the plugins used in FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              // plugins used in FullCalendar
+              plugins={[
+                rrulePlugin,
+                dayGridPlugin,
+                timeGridPlugin,
+                interactionPlugin,
+              ]}
               // Set the initial view of the calendar to "dayGridMonth"
               initialView="dayGridMonth"
               // header toolbar customization
@@ -48,6 +54,7 @@ const CalendarApp = () => {
                 center: "title",
                 end: "dayGridMonth,timeGridWeek,timeGridDay",
               }}
+              weekends={true}
               // allow to drag and drop
               editable={true}
               // allow events to select

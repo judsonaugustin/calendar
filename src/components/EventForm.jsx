@@ -33,9 +33,11 @@ const EventForm = ({ calendarRef }) => {
     const calendarApi = calendarRef.current.getApi();
 
     const rrule = new RRule({
-      freq: RRule.DAILY,
+      freq: RRule.WEEKLY,
+      interval: 5,
       dtstart: new Date(startDate),
       until: new Date(endDate),
+      byweekday: [0, 1, 2, 3, 4],
     });
 
     // Check if there are any recurring dates
@@ -58,6 +60,7 @@ const EventForm = ({ calendarRef }) => {
     // Perform form validation here
     if (eventTitle && startDate && endDate) {
       handleSubmit();
+      setErrorMessage("");
     } else {
       // Display an error message
       setErrorMessage("Please fill all the fields in the form");
@@ -122,6 +125,14 @@ const EventForm = ({ calendarRef }) => {
             className="shadow-lg rounded-lg px-5 py-2  w-full"
           />
         </div>
+        {/* <div className="mt-4">
+          <div className="font-medium text-[#1b1b1b]">
+            <label className="mr-4" htmlFor="end-date">
+              Weekends
+            </label>
+          </div>
+        </div> */}
+        {/* <input type="checkbox" /> */}
         <p className="text-center mt-2">{errorMessage}</p>
         <div className="mt-4 flex gap-4 justify-center">
           <button
